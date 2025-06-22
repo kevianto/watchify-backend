@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {   cors: {
-    origin: "http://localhost:5173/", // Replace with your frontend URL
+    origin: "http://localhost:5173/" || "https://watchify-seven.vercel.app/", // Replace with your frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],}
 }});
 
