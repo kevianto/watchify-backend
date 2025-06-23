@@ -14,10 +14,9 @@ export const setupSocket = (io) => {
       console.log(`Socket ${socket.id} left room ${roomId}`);
     });
 
-    // Handle video control actions from the frontend
+    // Video controls
     socket.on("video-control", ({ roomId, action, currentTime }) => {
       console.log(`Video action: ${action} in room: ${roomId}`);
-
       switch (action) {
         case "play":
           socket.to(roomId).emit("play");
@@ -33,13 +32,13 @@ export const setupSocket = (io) => {
       }
     });
 
-    // Real-time chat messaging
-    socket.on("send-message", ({ roomId, message }) => {
-    io.to(roomId).emit("receive-message", message);
-
+    // ✅ Corrected chat messaging
+    socket.on("send-message", ({ roomId, sender, text, isAnonymous }) => {
+      const messagePayload = { sender, text, isAnonymous };
+      io.to(roomId).emit("receive-message", messagePayload);
     });
 
-    // Handle disconnection
+    // Disconnection
     socket.on("disconnect", () => {
       console.log(`Socket ${socket.id} disconnected`);
     });
