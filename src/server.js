@@ -1,5 +1,5 @@
 import express from "express";
-import http from "http";
+import http from "http"; // ✅ Needed for raw server
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,39 +8,50 @@ import ConnectToDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import { setupSocket } from "./socket/index.js";
-dotenv.config();
-const PORT = process.env.PORT || 3000;
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {   cors: {
-    origin: "http://localhost:5173/" || "https://watchify-seven.vercel.app/", // Replace with your frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],}
-}});
 
-app.use(cors());
+dotenv.config();
+
+const PORT = process.env.PORT || 5000;
+
+const app = express();
+const server = http.createServer(app); // ✅ Socket.IO attaches to *this* server
+
+// ✅ CORS config
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://watchify-seven.vercel.app"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 app.use(express.json());
 
+// ✅ REST API routes
 app.use("/auth", authRoutes);
 app.use("/rooms", roomRoutes);
 
+// ✅ Attach Socket.IO to HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  }
+});
+
+// ✅ Setup custom socket logic
 setupSocket(io);
-// Handle socket connection
-io.on("connection", (socket) => {
-  console.log("⚡ A user connected:", socket.id);
 
-  socket.on("createRoom", (roomData) => {
-    console.log("Room created:", roomData);
-    // Emit roomCreated or other events if needed
-  });
-
-  socket.on("disconnect", () => {
-    console.log("🚪 User disconnected:", socket.id);
-  });
+// ✅ Optional: test route
+app.get("/", (req, res) => {
+  res.send("Watchify backend is running.");
 });
 
-app.listen(PORT, async () => {
+// ✅ Start server
+server.listen(PORT, async () => {
   await ConnectToDB();
-  console.log(`app running at http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });
-
