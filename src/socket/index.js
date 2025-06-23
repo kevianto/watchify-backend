@@ -35,7 +35,8 @@ export const setupSocket = (io) => {
 
     // Real-time chat messaging
     socket.on("send-message", ({ roomId, message }) => {
-      socket.to(roomId).emit("receive-message", message);
+    io.to(roomId).emit("receive-message", message);
+
     });
 
     // Handle disconnection
