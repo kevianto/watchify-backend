@@ -18,19 +18,19 @@ export const setupSocket = (io) => {
     socket.on("video-control", ({ roomId, action, currentTime }) => {
       console.log(`🎬 Video control received: ${action} | Room: ${roomId} | Time: ${currentTime ?? "N/A"}`);
 
-      switch (action) {
-        case "play":
-          socket.to(roomId).emit("play");
-          break;
-        case "pause":
-          socket.to(roomId).emit("pause");
-          break;
-        case "seek":
-          socket.to(roomId).emit("seek", { time: currentTime });
-          break;
-        default:
-          console.warn(`⚠️ Unknown video control action: ${action}`);
-      }
+     switch (action) {
+    case "play":
+      io.to(roomId).emit("play"); // ✅ Emit to everyone
+      break;
+    case "pause":
+      io.to(roomId).emit("pause");
+      break;
+    case "seek":
+      io.to(roomId).emit("seek", { time: currentTime });
+      break;
+    default:
+      console.warn(`⚠️ Unknown video control action: ${action}`);
+  }
     });
 
     // ✅ Real-time chat messaging
